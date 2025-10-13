@@ -16,6 +16,10 @@ python-dotenv = "^1.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.0"
+poethepoet = "^0.37.0"
+
+[tool.poe]
+include = "issue_manager/tasks.yaml"
 
 [build-system]
 requires = ["poetry-core"]
