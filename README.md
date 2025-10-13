@@ -13,22 +13,65 @@ GitHub issue management CLI tool for Python projects.
 
 ## Installation
 
-### In your project
-
-```toml
-# pyproject.toml
-[tool.poetry.group.dev.dependencies]
-issue-manager = { path = "../issue-manager", develop = true }
+```bash
+poetry add --group dev git+https://github.com/basileaw/issue-manager.git
 ```
 
-Or from GitHub:
+## Usage
 
-```toml
-[tool.poetry.group.dev.dependencies]
-issue-manager = { git = "https://github.com/youruser/issue-manager.git", branch = "main" }
+### Direct CLI (Works immediately after installation)
+
+```bash
+issue list              # List all open issues
+issue bug               # Create a new bug issue
+issue task              # Create a new task issue
+issue idea              # Create a new idea issue
+issue resolve 1 2 3     # Resolve issues by number
+issue delete 1 2 3      # Delete issues permanently
 ```
 
-### Setup GitHub Token
+### Optional: Poe the Poet Integration
+
+If you use Poe the Poet and want custom task aliases, add to your `tasks.yaml`:
+
+```yaml
+tasks:
+  "issue:list":
+    cmd: issue list
+    help: List all open issues
+  
+  "issue:bug":
+    cmd: issue bug
+    help: Create a bug issue
+  
+  "issue:task":
+    cmd: issue task
+    help: Create a task issue
+  
+  "issue:idea":
+    cmd: issue idea
+    help: Create an idea issue
+  
+  "issue:resolve":
+    cmd: issue resolve
+    help: Resolve issues by number
+  
+  "issue:delete":
+    cmd: issue delete
+    help: Delete issues permanently
+```
+
+Then use:
+
+```bash
+poe issue:list
+poe issue:bug
+poe issue:resolve 1 2 3
+```
+
+## Setup
+
+### GitHub Token
 
 Create a `.env` file in your project root:
 
@@ -42,35 +85,10 @@ Or export it in your shell:
 export GITHUB_TOKEN=your_github_personal_access_token
 ```
 
-## Usage
+### GitHub Token Permissions
 
-### With Poe the Poet (Recommended)
-
-Add to your `tasks.yaml`:
-
-```yaml
-include:
-  - .venv/lib/python3.12/site-packages/issue_manager/tasks.yaml
-```
-
-Then use:
-
-```bash
-poe list              # List all open issues
-poe bug               # Create a new bug issue
-poe task              # Create a new task issue
-poe idea              # Create a new idea issue
-poe resolve 1 2 3     # Resolve issues by number
-poe delete 1 2 3      # Delete issues permanently by number
-```
-
-### Direct CLI Usage
-
-```bash
-python -m issue_manager.cli list
-python -m issue_manager.cli bug
-python -m issue_manager.cli resolve 1 2 3
-```
+Your personal access token needs these scopes:
+- `repo` (for private repos) or `public_repo` (for public repos only)
 
 ## Requirements
 
@@ -78,11 +96,6 @@ python -m issue_manager.cli resolve 1 2 3
 - Git repository with GitHub remote origin
 - GitHub personal access token with repo access
 - Tools: git (for repository detection)
-
-## GitHub Token Permissions
-
-Your personal access token needs these scopes:
-- `repo` (for private repos) or `public_repo` (for public repos only)
 
 ## Development
 
