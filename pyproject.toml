@@ -1,4 +1,3 @@
-# issue-manager/pyproject.toml
 [tool.poetry]
 name = "issue-manager"
 version = "0.1.0"
@@ -17,6 +16,10 @@ python-dotenv = "^1.0.0"
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.0"
 poethepoet = "^0.37.0"
+
+# Console script - works immediately after installation
+[tool.poetry.scripts]
+issue = "issue_manager.cli:app"
 
 [tool.poe]
 include = "issue_manager/tasks.yaml"
