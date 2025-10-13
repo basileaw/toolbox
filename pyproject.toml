@@ -1,0 +1,22 @@
+# issue-manager/pyproject.toml
+[tool.poetry]
+name = "issue-manager"
+version = "0.1.0"
+description = "GitHub issue management CLI tool"
+authors = ["Alex Basile <basileaw@gmail.com>"]
+readme = "README.md"
+packages = [{ include = "issue_manager" }]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+typer = "^0.12.0"
+rich = "^14.0.0"
+requests = "^2.32.0"
+python-dotenv = "^1.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
