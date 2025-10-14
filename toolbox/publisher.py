@@ -8,8 +8,11 @@ import subprocess
 import time
 from typing import Optional, Tuple
 from dotenv import load_dotenv
+from rich.console import Console
 
 load_dotenv()
+
+console = Console()
 
 
 class PublisherError(Exception):
@@ -29,7 +32,7 @@ class Publisher:
     def run_command(self, cmd: list[str], check: bool = True, capture: bool = True) -> subprocess.CompletedProcess:
         """Execute shell command."""
         if self.dry_run:
-            print(f"[DRY-RUN] Would run: {' '.join(cmd)}")
+            console.print(f"[bright_yellow][DRY-RUN][/bright_yellow] Would run: {' '.join(cmd)}")
             return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
 
         kwargs = {"check": check}
@@ -40,7 +43,7 @@ class Publisher:
 
     def validate_clean_repository(self):
         """Check if git repository is clean."""
-        print("Validating repository state...")
+        console.print("[cyan]Validating repository state...[/cyan]")
         # Always run validation, even in dry-run mode
         result = subprocess.run(
             ["git", "status", "--porcelain"],
@@ -57,7 +60,7 @@ class Publisher:
 
     def validate_pyproject(self):
         """Check if pyproject.toml exists and is valid."""
-        print("Validating pyproject.toml...")
+        console.print("[cyan]Validating pyproject.toml...[/cyan]")
 
         if not os.path.exists("pyproject.toml"):
             raise PublisherError(
@@ -141,56 +144,60 @@ class Publisher:
 
     def confirm_release(self, package_name: str, current_version: str, new_version: str, bump_type: str, skip_confirm: bool = False):
         """Show release details and prompt for confirmation."""
-        print("\n" + "="*60)
-        print("RELEASE DETAILS")
-        print("="*60)
-        print(f"  Package:  {package_name}")
-        print(f"  Current:  {current_version}")
-        print(f"  New:      {new_version}")
-        print(f"  Type:     {bump_type}")
-        print(f"  Mode:     {'DRY-RUN' if self.dry_run else 'LIVE'}")
-        print("="*60)
-        print("\nActions to be performed:")
-        print("  1. Bump version in pyproject.toml")
-        print("  2. Update poetry.lock file")
-        print("  3. Build package with Poetry")
-        print("  4. Publish to PyPI")
-        print("  5. Commit version changes")
-        print("  6. Create git tag v" + new_version)
-        print("  7. Push commit and tag to origin")
-        print("  8. Create GitHub release")
-        print("  9. Wait for PyPI publication")
-        print("="*60 + "\n")
+        console.print("\n[bright_blue]" + "="*60)
+        console.print("RELEASE DETAILS")
+        console.print("="*60 + "[/bright_blue]")
+        console.print(f"  Package:  [bold]{package_name}[/bold]")
+        console.print(f"  Current:  [dim]{current_version}[/dim]")
+        console.print(f"  New:      [green]{new_version}[/green]")
+        console.print(f"  Type:     [cyan]{bump_type}[/cyan]")
+        mode_color = "yellow" if self.dry_run else "green"
+        mode_text = "DRY-RUN" if self.dry_run else "LIVE"
+        console.print(f"  Mode:     [{mode_color}]{mode_text}[/{mode_color}]")
+        console.print("[bright_blue]" + "="*60 + "[/bright_blue]")
+
+        action_color = "yellow" if self.dry_run else "bright_red"
+        console.print(f"\n[{action_color}]Actions to be performed:[/{action_color}]")
+        console.print("  1. Bump version in pyproject.toml")
+        console.print("  2. Update poetry.lock file")
+        console.print("  3. Build package with Poetry")
+        console.print("  4. Publish to PyPI")
+        console.print("  5. Commit version changes")
+        console.print(f"  6. Create git tag v{new_version}")
+        console.print("  7. Push commit and tag to origin")
+        console.print("  8. Create GitHub release")
+        console.print("  9. Wait for PyPI publication")
+        console.print("[bright_blue]" + "="*60 + "[/bright_blue]\n")
 
         if self.dry_run:
-            print("[DRY-RUN] Skipping confirmation prompt")
+            console.print("[bright_yellow][DRY-RUN] Skipping confirmation prompt[/bright_yellow]")
             return
 
         if skip_confirm:
-            print("Proceeding with release (--yes flag set)...")
+            console.print("Proceeding with release (--yes flag set)...")
             return
 
-        response = input("Proceed? (Y/n): ").strip().lower()
+        response = console.input("[bold]Proceed? (Y/n): [/bold]").strip().lower()
         if response and response != 'y':
-            print("Release cancelled by user")
+            console.print("[yellow]Release cancelled by user[/yellow]")
             sys.exit(0)
 
     def bump_version(self, bump_type: str):
         """Bump version using Poetry."""
-        print(f"Bumping version ({bump_type})...")
+        console.print(f"[cyan]Bumping version ({bump_type})...[/cyan]")
         self.run_command(["poetry", "version", bump_type])
 
-        print("Updating poetry.lock...")
+        console.print("[cyan]Updating poetry.lock...[/cyan]")
         self.run_command(["poetry", "lock", "--no-update"])
 
     def build_package(self):
         """Build package with Poetry."""
-        print("Building package...")
+        console.print("[cyan]Building package...[/cyan]")
         self.run_command(["poetry", "build"])
 
     def publish_to_pypi(self):
         """Publish package to PyPI."""
-        print("Publishing to PyPI...")
+        console.print("[cyan]Publishing to PyPI...[/cyan]")
 
         token = os.getenv("PYPI_API_TOKEN")
         if not token:
@@ -200,7 +207,7 @@ class Publisher:
             )
 
         if self.dry_run:
-            print("[DRY-RUN] Would publish to PyPI with token")
+            console.print("[bright_yellow][DRY-RUN] Would publish to PyPI with token[/bright_yellow]")
             return
 
         self.run_command([
@@ -211,28 +218,28 @@ class Publisher:
 
     def git_commit_and_tag(self, version: str):
         """Commit version changes and create tag."""
-        print("Committing version changes...")
+        console.print("[cyan]Committing version changes...[/cyan]")
         self.run_command(["git", "add", "pyproject.toml", "poetry.lock"])
         self.run_command(["git", "commit", "-m", f"release {version}"])
 
-        print(f"Creating tag v{version}...")
+        console.print(f"[cyan]Creating tag v{version}...[/cyan]")
         self.run_command(["git", "tag", f"v{version}"])
 
-        print("Pushing to origin...")
+        console.print("[cyan]Pushing to origin...[/cyan]")
         self.run_command(["git", "push", "origin", "HEAD"])
         self.run_command(["git", "push", "origin", f"v{version}"])
 
     def create_github_release(self, version: str):
         """Create GitHub release using REST API."""
-        print("Creating GitHub release...")
+        console.print("[cyan]Creating GitHub release...[/cyan]")
 
         token = os.getenv("GITHUB_TOKEN")
         if not token:
-            print("Warning: GITHUB_TOKEN not set. Skipping GitHub release creation.")
+            console.print("[yellow]Warning: GITHUB_TOKEN not set. Skipping GitHub release creation.[/yellow]")
             return
 
         if self.dry_run:
-            print("[DRY-RUN] Would create GitHub release")
+            console.print("[bright_yellow][DRY-RUN] Would create GitHub release[/bright_yellow]")
             return
 
         try:
@@ -280,30 +287,30 @@ class Publisher:
             response = requests.post(url, json=data, headers=headers)
 
             if response.status_code == 201:
-                print(f"✓ GitHub release created: {response.json()['html_url']}")
+                console.print(f"[green]✓ GitHub release created: {response.json()['html_url']}[/green]")
             else:
-                print(f"Warning: GitHub release creation failed: {response.status_code}")
-                print(f"  {response.json().get('message', 'Unknown error')}")
+                console.print(f"[yellow]Warning: GitHub release creation failed: {response.status_code}[/yellow]")
+                console.print(f"[yellow]  {response.json().get('message', 'Unknown error')}[/yellow]")
 
         except ImportError:
-            print("Warning: requests library not available. Skipping GitHub release.")
+            console.print("[yellow]Warning: requests library not available. Skipping GitHub release.[/yellow]")
         except Exception as e:
-            print(f"Warning: GitHub release creation failed: {e}")
+            console.print(f"[yellow]Warning: GitHub release creation failed: {e}[/yellow]")
 
     def poll_pypi(self, package_name: str, version: str, max_retries: int = 12, interval: int = 5):
         """Wait for package to appear on PyPI."""
         if self.dry_run:
-            print("[DRY-RUN] Would poll PyPI for publication")
+            console.print("[bright_yellow][DRY-RUN] Would poll PyPI for publication[/bright_yellow]")
             return
 
-        print("Waiting for PyPI publication...")
+        console.print("[cyan]Waiting for PyPI publication...[/cyan]")
 
         try:
             import requests
 
             for i in range(max_retries):
                 spinner = "|/-\\"[i % 4]
-                print(f"\rChecking PyPI {spinner}", end="", flush=True)
+                console.print(f"\rChecking PyPI {spinner}", end="")
 
                 try:
                     response = requests.get(f"{self.PYPI_API}/{package_name}/json", timeout=10)
@@ -312,25 +319,25 @@ class Publisher:
                         latest_version = data.get("info", {}).get("version")
 
                         if latest_version == version:
-                            print(f"\r✓ Version {version} published to PyPI!")
+                            console.print(f"\r[green]✓ Version {version} published to PyPI![/green]")
                             return
                 except:
                     pass
 
                 time.sleep(interval)
 
-            print(f"\r⚠ Timeout waiting for PyPI publication")
-            print(f"Check manually: https://pypi.org/project/{package_name}/")
+            console.print(f"\r[yellow]⚠ Timeout waiting for PyPI publication[/yellow]")
+            console.print(f"[dim]Check manually: https://pypi.org/project/{package_name}/[/dim]")
 
         except ImportError:
-            print("Warning: requests library not available. Skipping PyPI polling.")
+            console.print("[yellow]Warning: requests library not available. Skipping PyPI polling.[/yellow]")
 
     def rollback(self, version: Optional[str] = None):
         """Rollback changes on error."""
         if self.dry_run:
             return
 
-        print("\nRolling back changes...")
+        console.print("\n[red]Rolling back changes...[/red]")
 
         try:
             # Reset files
@@ -347,9 +354,9 @@ class Publisher:
                 subprocess.run(["git", "tag", "-d", f"v{version}"],
                              capture_output=True, check=False)
 
-            print("✓ Rollback completed")
+            console.print("[green]✓ Rollback completed[/green]")
         except Exception as e:
-            print(f"Warning: Rollback may be incomplete: {e}")
+            console.print(f"[yellow]Warning: Rollback may be incomplete: {e}[/yellow]")
 
     def release(self, bump_type: str, skip_confirm: bool = False):
         """Execute full release workflow."""
@@ -375,7 +382,7 @@ class Publisher:
             self.confirm_release(package_name, current_version, new_version, bump_type, skip_confirm)
 
             if self.dry_run:
-                print("\n[DRY-RUN] All checks passed. No changes made.")
+                console.print("\n[bright_yellow][DRY-RUN] All checks passed. No changes made.[/bright_yellow]")
                 return
 
             # Execute release steps
@@ -391,31 +398,31 @@ class Publisher:
             self.poll_pypi(package_name, new_version)
 
             # Success!
-            print("\n" + "="*60)
-            print(f"✓ Release {new_version} completed successfully!")
-            print("="*60)
-            print(f"  Package: https://pypi.org/project/{package_name}/{new_version}/")
+            console.print("\n[bright_green]" + "="*60 + "[/bright_green]")
+            console.print(f"[bright_green]✓ Release {new_version} completed successfully![/bright_green]")
+            console.print("[bright_green]" + "="*60 + "[/bright_green]")
+            console.print(f"[dim]  Package: https://pypi.org/project/{package_name}/{new_version}/[/dim]")
 
             try:
                 repo = self.get_repo_info()
-                print(f"  Release: https://github.com/{repo}/releases/tag/v{new_version}")
+                console.print(f"[dim]  Release: https://github.com/{repo}/releases/tag/v{new_version}[/dim]")
             except:
                 pass
 
-            print("="*60)
+            console.print("[bright_green]" + "="*60 + "[/bright_green]")
 
         except PublisherError as e:
-            print(f"\nError: {e}", file=sys.stderr)
+            console.print(f"\n[red]Error: {e}[/red]", file=sys.stderr)
             self.rollback(new_version if 'new_version' in locals() else None)
             sys.exit(1)
         except subprocess.CalledProcessError as e:
-            print(f"\nCommand failed: {' '.join(e.cmd)}", file=sys.stderr)
+            console.print(f"\n[red]Command failed: {' '.join(e.cmd)}[/red]", file=sys.stderr)
             if e.stderr:
-                print(f"  {e.stderr}", file=sys.stderr)
+                console.print(f"[red]  {e.stderr}[/red]", file=sys.stderr)
             self.rollback(new_version if 'new_version' in locals() else None)
             sys.exit(1)
         except Exception as e:
-            print(f"\nUnexpected error: {e}", file=sys.stderr)
+            console.print(f"\n[red]Unexpected error: {e}[/red]", file=sys.stderr)
             self.rollback(new_version if 'new_version' in locals() else None)
             sys.exit(1)
 
