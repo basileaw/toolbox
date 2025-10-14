@@ -50,7 +50,7 @@ def delete(
 
 @app.command()
 def release(
-    bump_type: str = typer.Argument(..., help="Version bump type: patch, minor, or major"),
+    bump_type: str = typer.Argument(help="Version bump type: patch, minor, or major"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Simulate release without making changes"),
     yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation prompt")
 ):
