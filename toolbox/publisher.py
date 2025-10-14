@@ -144,9 +144,9 @@ class Publisher:
 
     def confirm_release(self, package_name: str, current_version: str, new_version: str, bump_type: str, skip_confirm: bool = False):
         """Show release details and prompt for confirmation."""
-        console.print("\n[bright_blue]" + "="*60)
-        console.print("RELEASE DETAILS")
-        console.print("="*60 + "[/bright_blue]")
+        console.print("\n[bright_blue]" + "="*60 + "[/bright_blue]")
+        console.print("[bright_blue]RELEASE DETAILS[/bright_blue]")
+        console.print("[bright_blue]" + "="*60 + "[/bright_blue]")
         console.print(f"  Package:  [bold]{package_name}[/bold]")
         console.print(f"  Current:  [dim]{current_version}[/dim]")
         console.print(f"  New:      [green]{new_version}[/green]")
@@ -412,17 +412,17 @@ class Publisher:
             console.print("[bright_green]" + "="*60 + "[/bright_green]")
 
         except PublisherError as e:
-            console.print(f"\n[red]Error: {e}[/red]", file=sys.stderr)
+            console.print(f"\n[red]Error: {e}[/red]")
             self.rollback(new_version if 'new_version' in locals() else None)
             sys.exit(1)
         except subprocess.CalledProcessError as e:
-            console.print(f"\n[red]Command failed: {' '.join(e.cmd)}[/red]", file=sys.stderr)
+            console.print(f"\n[red]Command failed: {' '.join(e.cmd)}[/red]")
             if e.stderr:
-                console.print(f"[red]  {e.stderr}[/red]", file=sys.stderr)
+                console.print(f"[red]  {e.stderr}[/red]")
             self.rollback(new_version if 'new_version' in locals() else None)
             sys.exit(1)
         except Exception as e:
-            console.print(f"\n[red]Unexpected error: {e}[/red]", file=sys.stderr)
+            console.print(f"\n[red]Unexpected error: {e}[/red]")
             self.rollback(new_version if 'new_version' in locals() else None)
             sys.exit(1)
 
