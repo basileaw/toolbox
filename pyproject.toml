@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "issue-manager"
-version = "0.1.0"
-description = "GitHub issue management CLI tool"
+name = "toolbox"
+version = "0.2.0"
+description = "Developer toolbox CLI - task management and utilities"
 authors = ["Alex Basile <basileaw@gmail.com>"]
 readme = "README.md"
-packages = [{ include = "issue_manager" }]
+packages = [{ include = "toolbox" }]
 
 [tool.poetry.dependencies]
 python = ">=3.12,<4.0"
@@ -19,10 +19,8 @@ poethepoet = "^0.37.0"
 
 # Console script - works immediately after installation
 [tool.poetry.scripts]
-issue = "issue_manager.cli:app"
+box = "toolbox.cli:app"
 
-[tool.poe]
-include = "issue_manager/tasks.yaml"
 
 [build-system]
 requires = ["poetry-core"]

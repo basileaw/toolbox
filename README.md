@@ -1,20 +1,21 @@
-# issue-manager
+# toolbox
 
-GitHub issue management CLI tool for Python projects.
+Developer toolbox CLI - task management and utilities for Python projects.
 
 ## Features
 
-- List all open issues with colored labels
+### Task Management
+- List all open GitHub issues/tasks with colored labels
 - Create bug, task, and idea issues interactively
-- Resolve (close) one or multiple issues
-- Delete issues permanently (uses GraphQL API)
+- Resolve (close) one or multiple tasks
+- Delete tasks permanently (uses GraphQL API)
 - Auto-detects repository from git remote
 - Rich terminal output with colors
 
 ## Installation
 
 ```bash
-poetry add --group dev git+https://github.com/basileaw/issue-manager.git
+poetry add --group dev git+https://github.com/basileaw/toolbox.git
 ```
 
 ## Usage
@@ -22,51 +23,51 @@ poetry add --group dev git+https://github.com/basileaw/issue-manager.git
 ### Direct CLI (Works immediately after installation)
 
 ```bash
-issue list              # List all open issues
-issue bug               # Create a new bug issue
-issue task              # Create a new task issue
-issue idea              # Create a new idea issue
-issue resolve 1 2 3     # Resolve issues by number
-issue delete 1 2 3      # Delete issues permanently
+box list              # List all open tasks
+box bug               # Create a new bug task
+box task              # Create a new task
+box idea              # Create a new idea task
+box resolve 1 2 3     # Resolve tasks by number
+box delete 1 2 3      # Delete tasks permanently
 ```
 
 ### Optional: Poe the Poet Integration
 
-If you use Poe the Poet and want custom task aliases, add to your `tasks.yaml`:
+If you use Poe the Poet and want custom task aliases, the toolbox automatically includes these tasks:
 
 ```yaml
 tasks:
-  "issue:list":
-    cmd: issue list
-    help: List all open issues
-  
-  "issue:bug":
-    cmd: issue bug
-    help: Create a bug issue
-  
-  "issue:task":
-    cmd: issue task
-    help: Create a task issue
-  
-  "issue:idea":
-    cmd: issue idea
-    help: Create an idea issue
-  
-  "issue:resolve":
-    cmd: issue resolve
-    help: Resolve issues by number
-  
-  "issue:delete":
-    cmd: issue delete
-    help: Delete issues permanently
+  list:
+    cmd: box list
+    help: List all open tasks
+
+  bug:
+    cmd: box bug
+    help: Create a new bug task
+
+  task:
+    cmd: box task
+    help: Create a new task
+
+  idea:
+    cmd: box idea
+    help: Create a new idea task
+
+  resolve:
+    cmd: box resolve
+    help: Resolve (close) tasks by number
+
+  delete:
+    cmd: box delete
+    help: Delete tasks permanently by number
 ```
 
 Then use:
 
 ```bash
-poe issue:list
-poe issue:bug
-poe issue:resolve 1 2 3
+poe list
+poe bug
+poe resolve 1 2 3
 ```
 
 ## Setup

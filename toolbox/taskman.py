@@ -1,9 +1,10 @@
-# issue-manager/issue_manager/cli.py
-"""GitHub issue management CLI tool."""
+# taskman.py
+
+"""GitHub task/issue management module."""
 import os
 import sys
 import re
-from typing import Optional, List
+from typing import List
 import requests
 import typer
 from rich.console import Console
@@ -14,7 +15,6 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-app = typer.Typer(help="GitHub issue management")
 console = Console()
 
 # GitHub API
@@ -105,13 +105,12 @@ def hex_to_rgb(hex_color: str) -> tuple:
         return None
 
 
-@app.command()
-def list():
-    """List all open issues."""
+def list_tasks():
+    """List all open tasks."""
     token = get_github_token()
     repo = get_repo_info()
 
-    console.print(f"[bright_blue]Fetching open issues for {repo}...[/bright_blue]")
+    console.print(f"[bright_blue]Fetching open tasks for {repo}...[/bright_blue]")
 
     # Get issues
     issues_response = github_request(
@@ -125,7 +124,7 @@ def list():
     label_colors = {label["name"]: label["color"] for label in labels}
 
     if not issues:
-        console.print("[gray]No open issues found[/gray]")
+        console.print("[gray]No open tasks found[/gray]")
         return
 
     # Create table
@@ -167,8 +166,8 @@ def list():
     console.print(table)
 
 
-def create_issue(label: str):
-    """Create an issue with the specified label."""
+def create_task(label: str):
+    """Create a task with the specified label."""
     token = get_github_token()
     repo = get_repo_info()
 
@@ -204,29 +203,23 @@ def create_issue(label: str):
     )
 
 
-@app.command()
-def bug():
-    """Create a new bug issue."""
-    create_issue("bug")
+def create_bug():
+    """Create a new bug task."""
+    create_task("bug")
 
 
-@app.command()
-def task():
-    """Create a new task issue."""
-    create_issue("task")
+def create_task_issue():
+    """Create a new task."""
+    create_task("task")
 
 
-@app.command()
-def idea():
-    """Create a new idea issue."""
-    create_issue("idea")
+def create_idea():
+    """Create a new idea task."""
+    create_task("idea")
 
 
-@app.command()
-def resolve(
-    issue_numbers: List[int] = typer.Argument(..., help="Issue numbers to resolve")
-):
-    """Resolve (close) issues by number."""
+def resolve_tasks(issue_numbers: List[int]):
+    """Resolve (close) tasks by number."""
     token = get_github_token()
     repo = get_repo_info()
 
@@ -262,11 +255,8 @@ def resolve(
         )
 
 
-@app.command()
-def delete(
-    issue_numbers: List[int] = typer.Argument(..., help="Issue numbers to delete")
-):
-    """Delete issues permanently by number (uses GraphQL API)."""
+def delete_tasks(issue_numbers: List[int]):
+    """Delete tasks permanently by number (uses GraphQL API)."""
     token = get_github_token()
     repo = get_repo_info()
     owner, name = repo.split("/")
@@ -344,7 +334,3 @@ def delete(
             f"[green]✓[/green] Deleted [{label_style}]{label_name}[/{label_style}] "
             f"[green]{number}[/green]: [bold]{title}[/bold]"
         )
-
-
-if __name__ == "__main__":
-    app()
