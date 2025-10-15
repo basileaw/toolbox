@@ -8,8 +8,7 @@ Developer toolbox CLI - task management and utilities for Python projects.
 - List all open GitHub issues/tasks with colored labels
 - Create bug, task, and idea issues interactively
 - Resolve (close) one or multiple tasks
-- Delete tasks permanently (uses GraphQL API)
-- Auto-detects repository from git remote
+- Delete tasks permanently
 - Rich terminal output with colors
 
 ## Installation
@@ -33,42 +32,17 @@ box delete 1 2 3      # Delete tasks permanently
 
 ### Optional: Poe the Poet Integration
 
-If you use Poe the Poet and want custom task aliases, the toolbox automatically includes these tasks:
+If you use Poe the Poet, you can create task aliases in your `pyproject.toml`:
 
 ```yaml
-tasks:
-  list:
-    cmd: box list
-    help: List all open tasks
-
-  bug:
-    cmd: box bug
-    help: Create a new bug task
-
-  task:
-    cmd: box task
-    help: Create a new task
-
-  idea:
-    cmd: box idea
-    help: Create a new idea task
-
-  resolve:
-    cmd: box resolve
-    help: Resolve (close) tasks by number
-
-  delete:
-    cmd: box delete
-    help: Delete tasks permanently by number
+[tool.poe.tasks]
+list = "box list"
+bug = "box bug"
+resolve = "box resolve"
+# ... add other commands as needed
 ```
 
-Then use:
-
-```bash
-poe list
-poe bug
-poe resolve 1 2 3
-```
+Then use: `poe list`, `poe bug`, `poe resolve 1 2 3`
 
 ## Setup
 
@@ -98,12 +72,3 @@ Your personal access token needs these scopes:
 - GitHub personal access token with repo access
 - Tools: git (for repository detection)
 
-## Development
-
-```bash
-# Install dependencies
-poetry install
-
-# Run tests
-poetry run pytest
-```
