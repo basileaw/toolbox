@@ -10,8 +10,6 @@ from typing import Optional, Tuple
 from dotenv import load_dotenv
 from rich.console import Console
 
-load_dotenv()
-
 console = Console()
 
 
@@ -26,6 +24,7 @@ class Publisher:
     PYPI_API = "https://pypi.org/pypi"
 
     def __init__(self, dry_run: bool = False):
+        load_dotenv()  # Load from current working directory at runtime
         self.dry_run = dry_run
         self.original_commit = None
 
